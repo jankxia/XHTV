@@ -197,5 +197,18 @@ const CUSTOM_API_CONFIG = {
     adultPropName: 'isAdult' // 用于标记成人内容的属性名
 };
 
-// 新增隐藏内置黄色采集站API的变量，默认为true
-const HIDE_BUILTIN_ADULT_APIS = true;
+// 获取环境变量工具函数
+function getEnvVariable(key, defaultValue) {
+    // 优先从 window.__ENV__ 读取（前端注入）
+    if (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__[key] !== undefined) {
+        return window.__ENV__[key] === 'true' || window.__ENV__[key] === true;
+    }
+    // Node 环境变量（如 SSR 或构建时）
+    if (typeof process !== 'undefined' && process.env && process.env[key] !== undefined) {
+        return process.env[key] === 'true' || process.env[key] === true;
+    }
+    return defaultValue;
+}
+
+// 新增隐藏内置黄色采集站API的变量，默认为true，但可以通过环境变量覆盖
+const HIDE_BUILTIN_ADULT_APIS = getEnvVariable('HIDE_ADULT_APIS', true);

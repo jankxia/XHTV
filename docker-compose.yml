@@ -7,4 +7,5 @@ services:
       - "8899:80"
     environment:
       - PASSWORD=111111
+      - HIDE_ADULT_APIS=true # 用户可自定义 true/false
     restart: unless-stopped

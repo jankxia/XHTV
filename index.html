@@ -32,6 +32,11 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
+    <script>
+        window.__ENV__ = window.__ENV__ || {};
+        // 支持后端模板渲染或 Docker 启动脚本替换
+        window.__ENV__.HIDE_ADULT_APIS = "{{HIDE_ADULT_APIS}}";
+    </script>
 </head>
 <body class="page-bg text-white">
     <!-- 将历史记录按钮移到左上角 -->

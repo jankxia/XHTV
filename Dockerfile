@@ -12,11 +12,14 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
+# 安装 gettext 用于 envsubst
+RUN apk add --no-cache gettext
+
 # 暴露端口
 EXPOSE 80
 
 # 设置入口点
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "-c", "envsubst < /usr/share/nginx/html/index.html > /usr/share/nginx/html/index.html.tmp && mv /usr/share/nginx/html/index.html.tmp /usr/share/nginx/html/index.html && exec /docker-entrypoint.sh"]
 
 # 启动nginx
 CMD ["nginx", "-g", "daemon off;"]
