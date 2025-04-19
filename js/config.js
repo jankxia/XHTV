@@ -201,11 +201,17 @@ const CUSTOM_API_CONFIG = {
 function getEnvVariable(key, defaultValue) {
     // 优先从 window.__ENV__ 读取（前端注入）
     if (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__[key] !== undefined) {
-        return window.__ENV__[key] === 'true' || window.__ENV__[key] === true;
+        const val = window.__ENV__[key];
+        if (val === true || val === 'true') return true;
+        if (val === false || val === 'false') return false;
+        return defaultValue;
     }
     // Node 环境变量（如 SSR 或构建时）
     if (typeof process !== 'undefined' && process.env && process.env[key] !== undefined) {
-        return process.env[key] === 'true' || process.env[key] === true;
+        const val = process.env[key];
+        if (val === true || val === 'true') return true;
+        if (val === false || val === 'false') return false;
+        return defaultValue;
     }
     return defaultValue;
 }
