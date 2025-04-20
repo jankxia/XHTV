@@ -171,6 +171,23 @@
         </a>
     </header>
 
+    <!-- 添加密码验证弹窗 -->
+    <div id="passwordModal" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[65] transition-opacity duration-300">
+        <div class="bg-[#111] p-8 rounded-lg w-11/12 max-w-md border border-[#333] max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6 flex-none">
+                <h2 class="text-2xl font-bold gradient-text">访问验证</h2>
+            </div>
+            <div class="mb-6">
+                <p class="text-gray-300 mb-4">请输入密码继续访问</p>
+                <input type="password" id="passwordInput" class="w-full bg-[#111] border border-[#333] text-white px-4 py-3 rounded-lg focus:outline-none focus:border-white transition-colors" placeholder="密码...">
+                <p id="passwordError" class="text-red-500 mt-2 hidden">密码错误，请重试</p>
+            </div>
+            <button id="passwordSubmitBtn" class="px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300">
+                确认
+            </button>
+        </div>
+    </div>
+
     <main class="container mx-auto px-4 py-4">
         <!-- 视频播放区 -->
         <div id="playerContainer" class="player-container">
@@ -254,6 +271,67 @@
     <script src="https://s4.zstatic.net/ajax/libs/hls.js/1.5.6/hls.min.js" integrity="sha256-X1GmLMzVcTBRiGjEau+gxGpjRK96atNczcLBg5w6hKA=" crossorigin="anonymous"></script>
     <script src="https://s4.zstatic.net/ajax/libs/dplayer/1.26.0/DPlayer.min.js" integrity="sha256-OJg03lDZP0NAcl3waC9OT5jEa8XZ8SM2n081Ik953o4=" crossorigin="anonymous"></script>
     <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
+    <script>
+        // 保存原始 js‑sha256 实现，避免被覆盖
+        window._jsSha256 = window.sha256;
+    </script>
+    <script src="js/password.js"></script>
+    
+    <script>
+        // 环境变量注入 (将由服务器端替换)
+        window.__ENV__ = window.__ENV__ || {};
+        window.__ENV__.PASSWORD = "{{PASSWORD}}";
+        
+        // 页面加载时检查密码保护
+        document.addEventListener('DOMContentLoaded', function() {
+            // 如果需要密码保护且未验证，先进行密码验证
+            if (window.isPasswordProtected && window.isPasswordVerified) {
+                if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+                    // 隐藏主内容，直到密码验证通过
+                    document.querySelector('.player-container').style.display = 'none';
+                    document.querySelector('.episode-list-container').style.display = 'none';
+                    
+                    // 显示密码弹窗
+                    showPasswordModal && showPasswordModal();
+                    
+                    // 处理密码提交
+                    const submitButton = document.getElementById('passwordSubmitBtn');
+                    if (submitButton) {
+                        submitButton.addEventListener('click', async function() {
+                            // 使用 password.js 中的方法验证密码
+                            const passwordInput = document.getElementById('passwordInput');
+                            const password = passwordInput ? passwordInput.value.trim() : '';
+                            if (await verifyPassword(password)) {
+                                // 密码验证成功，显示内容
+                                document.querySelector('.player-container').style.display = '';
+                                document.querySelector('.episode-list-container').style.display = '';
+                                document.getElementById('passwordModal').style.display = 'none';
+                            } else {
+                                // 显示错误信息
+                                document.getElementById('passwordError').classList.remove('hidden');
+                                if (passwordInput) {
+                                    passwordInput.value = '';
+                                    passwordInput.focus();
+                                }
+                            }
+                        });
+                    }
+                    
+                    // 添加回车键提交
+                    const passwordInput = document.getElementById('passwordInput');
+                    if (passwordInput) {
+                        passwordInput.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter') {
+                                document.getElementById('passwordSubmitBtn').click();
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    </script>
+    
     <script>
         // 全局变量
         let currentVideoTitle = '';
