@@ -56,6 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始检查成人API选中状态
     setTimeout(checkAdultAPIsSelected, 100);
+
+    renderHotRecommendations();
 });
 
 // 初始化API复选框
@@ -997,3 +999,37 @@ if (config.auth.enabled) {
 
 // 或者针对特定路由
 app.use('/api', authMiddleware);
+
+// 首页热门推荐渲染
+async function renderHotRecommendations() {
+    const container = document.getElementById('hotRecommendations');
+    if (!container) return;
+    container.innerHTML = '<div class="text-gray-400 text-center py-6">加载中...</div>';
+    try {
+        const resp = await fetch('https://movie.douban.com/j/search_subjects?type=tv&tag=%E5%9B%BD%E4%BA%A7%E5%89%A7&sort=recommend&page_limit=30&page_start=0');
+        const data = await resp.json();
+        if (!data.subjects || !Array.isArray(data.subjects)) throw new Error('无数据');
+        container.innerHTML = data.subjects.map(item => `
+            <div class="bg-[#181818] rounded-lg overflow-hidden shadow hover:shadow-lg transition-all cursor-pointer flex flex-col items-center p-2 group"
+                 style="width:120px"
+                 title="${item.title}"
+                 onclick="searchHotRecommendation('${item.title.replace(/'/g, "\\'")}')">
+                <img src="${item.cover}" alt="${item.title}" class="w-full h-40 object-cover rounded group-hover:scale-105 transition-transform" loading="lazy">
+                <div class="mt-2 text-sm font-semibold text-white text-center truncate w-full">${item.title}</div>
+                <div class="text-xs text-gray-400">${item.episodes_info || ''}</div>
+                <div class="text-xs text-yellow-400">${item.rate ? '评分: ' + item.rate : ''}</div>
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = '<div class="text-red-400 text-center py-6">热门推荐加载失败</div>';
+    }
+}
+
+// 热门推荐点击后自动搜索
+window.searchHotRecommendation = function(title) {
+    const input = document.getElementById('searchInput');
+    if (input) {
+        input.value = title;
+        search();
+    }
+};
