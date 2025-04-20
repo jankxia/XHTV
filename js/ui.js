@@ -486,7 +486,7 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
                 playUrl += positionParam;
             }
             
-            // 添加集数列表参数
+            // 添加集数列表参数（确保URL中总是包含集数信息）
             if (episodesList.length > 0 && !url.includes('episodes=')) {
                 playUrl += episodesParam;
             }
