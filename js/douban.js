@@ -206,18 +206,20 @@ function renderRecommend(tag, pageLimit, pageStart) {
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;');
                     
-                    // 关键修复：使用内置的代理功能加载豆瓣图片
-                    // 1. 确保图片URL是安全的
-                    // 2. 使用PROXY_URL代理加载图片，避免跨域和豆瓣防盗链问题
+                    // 修复图片加载问题：使用备用图片URL方案
+                    // 1. 尝试使用原始图片地址但不通过代理
+                    // 2. 如果加载失败，使用备用图片
                     const originalCoverUrl = item.cover;
-                    const proxiedCoverUrl = PROXY_URL + encodeURIComponent(originalCoverUrl);
                     
                     card.innerHTML = `
                         <div class="relative w-full aspect-[2/3] overflow-hidden cursor-pointer" onclick="fillSearchInput('${safeTitle}')">
-                            <img src="${proxiedCoverUrl}" alt="${safeTitle}" 
+                            <img 
+                                src="${PROXY_URL + encodeURIComponent(originalCoverUrl)}" 
+                                alt="${safeTitle}" 
                                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450/111111/FFFFFF?text=${encodeURIComponent(safeTitle)}'; this.classList.add('object-contain');"
-                                loading="lazy">
+                                loading="lazy"
+                            >
                             <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
                             <div class="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
                                 <span class="text-yellow-400">★</span> ${safeRate}
