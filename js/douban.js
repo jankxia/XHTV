@@ -206,8 +206,12 @@ function renderRecommend(tag, pageLimit, pageStart) {
                         .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;');
                     
-                    // 使用内置代理加载图片
-                    const proxiedCoverUrl = PROXY_URL + encodeURIComponent(item.cover);
+                    // 修复图片加载问题：使用备用图片URL方案
+                    // 1. 尝试使用原始图片地址但不通过代理
+                    // 2. 如果加载失败，使用备用图片
+                    const originalCoverUrl = item.cover;
+                    // 直接使用原始封面URL（内置proxy不支持图片二进制数据）
+                    const proxiedCoverUrl = originalCoverUrl;
                     
                     card.innerHTML = `
                         <div class="relative w-full aspect-[2/3] overflow-hidden cursor-pointer" onclick="fillSearchInput('${safeTitle}')">
